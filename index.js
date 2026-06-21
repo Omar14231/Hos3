@@ -15,7 +15,7 @@ let monitoringEnabled = false;
 let monitorChannel = null;
 
 // أضف كلماتك هنا، البوت سيكتشفها حتى لو كانت داخل كلمة أخرى
-const alertWords = ['كلب', 'كلمة2', 'كلمة3']; 
+const alertWords = ['كلب', 'زق', 'حمار', ' زفت', 'غبي', 'وصخ', 'كل', 'سب', 'ريحه']; 
 
 client.once('ready', () => {
     console.log(`✅ البوت جاهز ويعمل بكامل طاقته!`);
