@@ -37,13 +37,14 @@ client.on('messageCreate', async (message) => {
         owner.send(`🔔 **تنبيه منشن!** <@${OWNER_ID}>\n👤 **الشخص:** ${message.author.tag}\n💬 **الرسالة:** ${message.content}\n📍 **الروم:** ${message.channel.name}`);
     }
 
-    // 2. أمر التفعيل
+        // 2. أمر التفعيل
     if (message.content === '!احم') {
         if (message.author.id !== OWNER_ID) return;
         monitoringEnabled = true;
         monitorChannel = message.channel;
         message.reply('🛡️ **تم تفعيل وضع المراقبة. أنا الآن أراقب الشات...**');
-        client.users.cache.get(OWNER_ID)?.send('🔔 **تم تفعيل مراقبة الشات بنجاح.**');
+        // هنا تم إضافة المنشن لك في الخاص
+        client.users.cache.get(OWNER_ID)?.send(`🔔 <@${OWNER_ID}> **تم تفعيل مراقبة الشات بنجاح.**`);
         return;
     }
 
@@ -52,6 +53,8 @@ client.on('messageCreate', async (message) => {
         if (message.author.id !== OWNER_ID) return;
         monitoringEnabled = false;
         message.channel.send('🚫 **تم إيقاف وضع المراقبة.**');
+        // هنا تم إضافة المنشن لك في الخاص
+        client.users.cache.get(OWNER_ID)?.send(`🔔 <@${OWNER_ID}> **تم إيقاف وضع المراقبة.**`);
         return;
     }
 
