@@ -1,4 +1,10 @@
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const express = require('express');
+const app = express();
+
+// --- جزء منع الخمول (HTTP) ---
+app.get('/', (req, res) => res.send('البوت يعمل الآن! 🚀'));
+app.listen(process.env.PORT || 3000);
 
 const client = new Client({
     intents: [
@@ -14,24 +20,21 @@ const OWNER_ID = '1306034100544737461';
 let monitoringEnabled = false;
 let monitorChannel = null;
 
-// أضف كلماتك هنا، البوت سيكتشفها حتى لو كانت داخل كلمة أخرى
+// --- ضع كلماتك هنا (المناطق التي تمنشنك) ---
 const alertWords = ['كلب', 'زق', 'حمار', ' زفت', 'غبي', 'وصخ', 'كل', 'سب', 'ريحه']; 
 
 client.once('ready', () => {
-    console.log(`✅ البوت جاهز ويعمل بكامل طاقته!`);
+    console.log(`✅ البوت جاهز: ${client.user.tag}`);
 });
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
-    // 1. نظام التنبيه (يقرأ الكلمة حتى لو مدموجة)
+    // 1. نظام التنبيه بالكلمات (حتى لو مدموجة)
     const msgContent = message.content.toLowerCase();
-    
-    // الفحص باستخدام .some() يضمن أنه بمجرد وجود جزء من الكلمة سيتم التنبيه
     if (alertWords.some(word => msgContent.includes(word))) {
         const owner = await client.users.fetch(OWNER_ID);
-        // إضافة <@OWNER_ID> تجعلها "منشن" حقيقي يصلك به إشعار
-        owner.send(`🔔 **تنبيه منشن!** <@${OWNER_ID}>\n👤 **الشخص:** ${message.author.tag}\n💬 **الرسالة:** ${message.content}\n📍 **في الروم:** ${message.channel.name}`);
+        owner.send(`🔔 **تنبيه منشن!** <@${OWNER_ID}>\n👤 **الشخص:** ${message.author.tag}\n💬 **الرسالة:** ${message.content}\n📍 **الروم:** ${message.channel.name}`);
     }
 
     // 2. أمر التفعيل
@@ -39,7 +42,8 @@ client.on('messageCreate', async (message) => {
         if (message.author.id !== OWNER_ID) return;
         monitoringEnabled = true;
         monitorChannel = message.channel;
-        message.reply('🛡️ **تم تفعيل وضع مراقبة الشات. انتبه!**');
+        message.reply('🛡️ **تم تفعيل وضع المراقبة. أنا الآن أراقب الشات...**');
+        client.users.cache.get(OWNER_ID)?.send('🔔 **تم تفعيل مراقبة الشات بنجاح.**');
         return;
     }
 
@@ -51,7 +55,7 @@ client.on('messageCreate', async (message) => {
         return;
     }
 
-    // 4. مراقبة الشات
+    // 4. المراقبة العامة (إرسال للخاص)
     if (monitoringEnabled && message.channel.id === monitorChannel?.id) {
         const owner = await client.users.fetch(OWNER_ID);
         owner.send(`👁️ **مراقبة:** ${message.author.tag}: ${message.content}`);
