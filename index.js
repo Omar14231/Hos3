@@ -14,25 +14,36 @@ const OWNER_ID = '1306034100544737461';
 let monitoringEnabled = false;
 let monitorChannel = null;
 
+// أضف كلماتك هنا، البوت سيكتشفها حتى لو كانت داخل كلمة أخرى
+const alertWords = ['كلب', 'كلمة2', 'كلمة3']; 
+
 client.once('ready', () => {
-    console.log(`✅ البوت جاهز: ${client.user.tag}`);
+    console.log(`✅ البوت جاهز ويعمل بكامل طاقته!`);
 });
 
-// التعامل مع الأوامر
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
-    // تفعيل المراقبة
+    // 1. نظام التنبيه (يقرأ الكلمة حتى لو مدموجة)
+    const msgContent = message.content.toLowerCase();
+    
+    // الفحص باستخدام .some() يضمن أنه بمجرد وجود جزء من الكلمة سيتم التنبيه
+    if (alertWords.some(word => msgContent.includes(word))) {
+        const owner = await client.users.fetch(OWNER_ID);
+        // إضافة <@OWNER_ID> تجعلها "منشن" حقيقي يصلك به إشعار
+        owner.send(`🔔 **تنبيه منشن!** <@${OWNER_ID}>\n👤 **الشخص:** ${message.author.tag}\n💬 **الرسالة:** ${message.content}\n📍 **في الروم:** ${message.channel.name}`);
+    }
+
+    // 2. أمر التفعيل
     if (message.content === '!احم') {
         if (message.author.id !== OWNER_ID) return;
         monitoringEnabled = true;
         monitorChannel = message.channel;
-        message.reply('🛡️ **تم تفعيل وضع المراقبة. أنا الآن أراقب الشات...**');
-        client.users.cache.get(OWNER_ID)?.send('🔔 **تم تفعيل مراقبة الشات بنجاح.**');
+        message.reply('🛡️ **تم تفعيل وضع مراقبة الشات. انتبه!**');
         return;
     }
 
-    // إيقاف المراقبة
+    // 3. أمر الإيقاف
     if (message.content === '!احمم') {
         if (message.author.id !== OWNER_ID) return;
         monitoringEnabled = false;
@@ -40,17 +51,16 @@ client.on('messageCreate', async (message) => {
         return;
     }
 
-    // منطق المراقبة (إرسال الرسائل للخاص)
+    // 4. مراقبة الشات
     if (monitoringEnabled && message.channel.id === monitorChannel?.id) {
-        const user = await client.users.fetch(OWNER_ID);
-        user.send(`⚠️ **تنبيه مراقبة:**\n👤 **الشخص:** ${message.author.tag} (${message.author.id})\n💬 **الرسالة:** ${message.content}\n🔗 **الرابط:** ${message.url}`);
+        const owner = await client.users.fetch(OWNER_ID);
+        owner.send(`👁️ **مراقبة:** ${message.author.tag}: ${message.content}`);
     }
 
-    // الرد من الخاص وإرساله للروم
+    // 5. الرد من الخاص للروم
     if (message.channel.isDMBased() && message.author.id === OWNER_ID && monitorChannel) {
-        monitorChannel.send(`📢 **رسالة من المالك:**\n${message.content}`);
+        monitorChannel.send(`${message.content}`);
     }
 });
 
 client.login(process.env.DISCORD_TOKEN);
-
